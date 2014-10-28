@@ -20,7 +20,15 @@ Array2D< double > generate2DNoise( Vector2ui size ) {
 	return noise_map;
 }
 
-Array2D< double > generateNoise( Vector2ui size, unsigned int rounds, unsigned int resolution_tuning, double dropoff ) {
+Array2D< double > generateNoise( Vector2ui size, unsigned int rounds, unsigned int resolution_tuning, double dropoff,
+								 bool tile ) {
+
+	// Prepare for tiling
+	if( tile ) {
+		size.x *= 2;
+		size.y *= 2;
+	}
+
 	// Initialize the noise array
 	Array2D< double > noise( size.x, size.y );
 	for( unsigned int x = 0; x < size.x; ++x ) {
@@ -81,11 +89,44 @@ Array2D< double > generateNoise( Vector2ui size, unsigned int rounds, unsigned i
 		limit += 1.;
 	}
 
+	// Linearly interpolate so that the noise tiles
+	if( tile ) {
+		Array2D< double > noise_backup = noise;
+		for( unsigned int x = size.x / 2; x < size.x; ++x ) {
+			for( unsigned int y = size.y / 2; y < size.y; ++y ) {
+				double value_a = noise_backup[ x ][ y ];
+				double value_b = noise_backup[ x - size.x / 2 ][ y ];
+				double value_c = noise_backup[ x ][ y - size.y / 2 ];
+				double value_d = noise_backup[ x - size.x / 2 ][ y - size.y / 2 ];
+				double x_norm = static_cast< double >( x - size.x / 2 ) / static_cast< double >( size.x / 2 );
+				double y_norm = static_cast< double >( y - size.y / 2 ) / static_cast< double >( size.y / 2 );
+				double weight_a = ( 1. - x_norm ) * ( 1. - y_norm );
+				double weight_b = x_norm * ( 1. - y_norm );
+				double weight_c = ( 1. - x_norm ) * y_norm;
+				double weight_d = x_norm * y_norm;
+				double new_value = weight_a * value_a + weight_b * value_b + weight_c * value_c + weight_d * value_d;
+				noise[ x ][ y ] = new_value;
+			}
+		}
+	}
+
 	// Finish by rescaling the noise
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			noise[ x ][ y ] /= limit;
 		}
+	}
+
+	// Trim it down to just the bottom-right corner if tiling
+	if( tile ) {
+		Array2D< double > final_noise( size.x / 2, size.y / 2 );
+		for( unsigned int x = size.x / 2; x < size.x; ++x ) {
+			for( unsigned int y = size.y / 2; y < size.y; ++y ) {
+				final_noise[ x - size.x / 2 ][ y - size.y / 2 ] = noise[ x ][ y ];
+			}
+		}
+
+		return final_noise;
 	}
 
 	return noise;

@@ -6,11 +6,11 @@
 
 int main( int argc, char* argv[] ) {
 	Vector2ui size;
-	size.x = 4096;
-	size.y = 4096;
+	size.x = 512;
+	size.y = 512;
 
 	// Generate noise
-	Array2D< double > noise = generateNoise( size, 8, 2, 0.8 );
+	Array2D< double > noise = generateNoise( size, 8, 2, 0.8, true );
 
 	// Write the noise to an image
 	sf::Image noisy_image;

@@ -10,6 +10,7 @@
 
 Array2D< double > generate2DNoise( Vector2ui size );
 
-Array2D< double > generateNoise( Vector2ui size, unsigned int rounds = 8, unsigned int resolution_tuning = 2, double dropoff = 0.5 );
+Array2D< double > generateNoise( Vector2ui size, unsigned int rounds = 8, unsigned int resolution_tuning = 2,
+								 double dropoff = 0.5, bool tile = false );
 
 #endif // NOISE_HPP
