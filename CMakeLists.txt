@@ -27,7 +27,10 @@ set(VERSION_PATCH 0)
 
 # Set the source files
 set(SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Array.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Noise.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Vector.cpp
 )
 
 # Set the output directory
