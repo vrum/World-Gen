@@ -100,10 +100,12 @@ Array2D< double > generateNoise( Vector2ui size, unsigned int rounds, unsigned i
 				double value_d = noise_backup[ x - size.x / 2 ][ y - size.y / 2 ];
 				double x_norm = static_cast< double >( x - size.x / 2 ) / static_cast< double >( size.x / 2 );
 				double y_norm = static_cast< double >( y - size.y / 2 ) / static_cast< double >( size.y / 2 );
-				double weight_a = ( 1. - x_norm ) * ( 1. - y_norm );
-				double weight_b = x_norm * ( 1. - y_norm );
-				double weight_c = ( 1. - x_norm ) * y_norm;
-				double weight_d = x_norm * y_norm;
+				double x_interp = x_norm * x_norm * ( 3. - 2. * x_norm );
+				double y_interp = y_norm * y_norm * ( 3. - 2. * y_norm );
+				double weight_a = ( 1. - x_interp ) * ( 1. - y_interp );
+				double weight_b = x_interp * ( 1. - y_interp );
+				double weight_c = ( 1. - x_interp ) * y_interp;
+				double weight_d = x_interp * y_interp;
 				double new_value = weight_a * value_a + weight_b * value_b + weight_c * value_c + weight_d * value_d;
 				noise[ x ][ y ] = new_value;
 			}
