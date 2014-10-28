@@ -37,8 +37,18 @@ int main( int argc, char* argv[] ) {
 	noisy_image.create( size.x, size.y );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
-			sf::Uint8 gray = static_cast< sf::Uint8 >( ( noise[ x ][ y ] + 1. ) / 2. * 255. );
-			noisy_image.setPixel( x, y, sf::Color( gray, gray, gray ) );
+			sf::Color pixel_color;
+
+			// Land
+			if( noise[ x ][ y ] > 0.03 ) {
+				pixel_color = sf::Color::Green;
+			}
+			// Water
+			else {
+				pixel_color = sf::Color::Blue;
+			}
+
+			noisy_image.setPixel( x, y, pixel_color );
 		}
 	}
 
