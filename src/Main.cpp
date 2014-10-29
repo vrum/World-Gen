@@ -30,7 +30,9 @@ int main( int argc, char* argv[] ) {
 	}
 
 	// Generate noise
-	Array2D< double > noise = generateNoise( size, layers, 2, persistence, true );
+	std::cout << "Noise Generation Start\n";
+	Array2D< double > noise = generateNoise( size, layers, persistence, true );
+	std::cout << "Noise Generation End\n";
 
 	// Write the noise to an image
 	sf::Image noisy_image;
@@ -39,14 +41,20 @@ int main( int argc, char* argv[] ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			sf::Color pixel_color;
 
+			/*
 			// Land
-			if( noise[ x ][ y ] > 0.03 ) {
+			if( noise[ x ][ y ] > 0.1 ) {
 				pixel_color = sf::Color::Green;
 			}
 			// Water
 			else {
 				pixel_color = sf::Color::Blue;
 			}
+			*/
+
+			pixel_color.r = static_cast< std::uint8_t >( 255 * noise[ x ][ y ] );
+			pixel_color.g = static_cast< std::uint8_t >( 255 * noise[ x ][ y ] );
+			pixel_color.b = static_cast< std::uint8_t >( 255 * noise[ x ][ y ] );
 
 			noisy_image.setPixel( x, y, pixel_color );
 		}

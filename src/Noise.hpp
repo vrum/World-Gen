@@ -4,19 +4,17 @@
 #ifndef NOISE_HPP
 #define NOISE_HPP
 
-#include <vector>
 #include "Array.hpp"
 #include "Vector.hpp"
 
-double noise1D( double x );
-double noise2D( double x, double y );
-double noise3D( double x, double y, double z );
-double noise4D( double x, double y, double z, double t );
-double noise5D( double x, double y, double z, double t, double u );
+Array< double, 2 > generateNoiseBase2D( Vector2ui size, unsigned int seed );
+Array< double, 4 > generateNoiseBase4D( Vector2ui size, unsigned int seed );
 
-Array2D< double > generate2DNoise( Vector2ui size );
+Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling );
+Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, double scaling );
 
-Array2D< double > generateNoise( Vector2ui size, unsigned int rounds = 8, unsigned int resolution_tuning = 2,
-								 double dropoff = 0.5, bool tile = false );
+Array< double, 2 > generateNoise( Vector2ui size, unsigned int octaves = 8, double dropoff = 0.5, bool tile = true );
+Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned int octaves = 8, double dropoff = 0.5,
+								  bool tile = true );
 
 #endif // NOISE_HPP
