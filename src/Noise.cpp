@@ -2,8 +2,35 @@
 // See the LICENSE file in the root directory of the repository for licensing information
 
 #include <cmath>
+#include <cstdint>
 #include <random>
 #include "Noise.hpp"
+
+double noise1D( std::int32_t x ) {
+	std::int32_t seed = x;
+	seed = ( seed << 17 ) ^ seed;
+	seed = ( seed * 727 + 701 );
+	seed = ( seed * 523 + 577 );
+	seed = ( seed * 857 + 397 );
+	double scale = static_cast< double >( UINT32_MAX );
+	return static_cast< double >( *reinterpret_cast< std::uint32_t* >( &seed ) ) / scale;
+}
+
+double noise2D( std::int32_t x, std::int32_t y ) {
+	return noise1D( x + 13*y );
+}
+
+double noise3D( std::int32_t x, std::int32_t y, std::int32_t z ) {
+	return noise1D( x + 13*y + 31*z );
+}
+
+double noise4D( std::int32_t x, std::int32_t y, std::int32_t z, std::int32_t t ) {
+	return noise1D( x + 13*y + 31*z + 71*t );
+}
+
+double noise5D( std::int32_t x, std::int32_t y, std::int32_t z, std::int32_t t, std::int32_t u ) {
+	return noise1D( x + 13*y + 31*z + 71*t + 41*u );
+}
 
 Array2D< double > generate2DNoise( Vector2ui size ) {
 	std::random_device entropy;
