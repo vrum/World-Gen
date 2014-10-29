@@ -5,48 +5,25 @@
 #include <random>
 #include "Noise.hpp"
 
-#include <iostream>
-
 static double pi = 3.14159265358979;
 
-Array< double, 2 > generateNoiseBase2D( Vector2ui size, unsigned int seed ) {
-	Array< double, 2 > noise( size.x, size.y );
-	std::mt19937_64 prng_engine( seed );
+double noiseFunc2D( unsigned int seed, unsigned int x, unsigned int y) {
+	std::mt19937_64 prng_engine( seed + 13*x + 29*y );
 	std::uniform_real_distribution< double > prng;
 
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			noise[ x ][ y ] = prng( prng_engine );
-		}
-	}
-
-	return noise;
+	return prng( prng_engine );
 }
 
-Array< double, 4 > generateNoiseBase4D( Vector2ui size, unsigned int seed ) {
-	Array< double, 4 > noise( size.x, size.y, size.x, size.y );
-	std::mt19937_64 prng_engine( seed );
+double noiseFunc4D( unsigned int seed, unsigned int x, unsigned int y, unsigned int u, unsigned int v ) {
+	std::mt19937_64 prng_engine( seed + 13*x + 29*y + 51*u + 67*v );
 	std::uniform_real_distribution< double > prng;
 
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			for( unsigned int u = 0; u < size.x; ++u ) {
-				for( unsigned int v = 0; v < size.y; ++v ) {
-					noise[ x ][ y ][ u ][ v ] = prng( prng_engine );
-				}
-			}
-		}
-	}
-
-	return noise;
+	return prng( prng_engine );
 }
 
 Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling ) {
-	// Initialize the octave
-	Array< double, 2 > octave = generateNoiseBase2D( size, seed );
-
-	// Scale the octave
-	Array< double, 2 > octave_scaled( size.x, size.y );
+	// Create the octave
+	Array< double, 2 > octave( size.x, size.y );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			// Recalculate the position
@@ -66,43 +43,37 @@ Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed
 			double t_y = y_interp * y_interp * ( 3 - 2 * y_interp );
 
 			// Calculate the side values
-			double topleft = octave[ left ][ top ];
-			double topright = octave[ right ][ top ];
-			double bottomleft = octave[ left ][ bottom ];
-			double bottomright = octave[ right ][ bottom ];
+			double topleft = noiseFunc2D( seed, left, top );
+			double topright = noiseFunc2D( seed, right, top );
+			double bottomleft = noiseFunc2D( seed, left, bottom );
+			double bottomright = noiseFunc2D( seed, right, bottom );
 
 			// Interpolate down to one value
 			double left_value = ( 1 - t_y ) * topleft + t_y * bottomleft;
 			double right_value = ( 1 - t_y ) * topright + t_y * bottomright;
 			double value = ( 1 - t_x ) * left_value + t_x * right_value;
 
-			octave_scaled[ x ][ y ] = value;
+			octave[ x ][ y ] = value;
 		}
 	}
 
-	return octave_scaled;
+	return octave;
 }
 
 Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, double scaling ) {
-	// Initialize the octave
-	std::cout << "Generating 4D base\n";
-	Array< double, 4 > octave = generateNoiseBase4D( size, seed );
-	std::cout << "4D base generated\n";
-
-	// Scale the octave
-	Array< double, 2 > octave_scaled( size.x, size.y );
+	// Create the octave
+	Array< double, 2 > octave( size.x, size.y );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
-			std::cout << "Position: " << x << ", " << y << '\n';
 			// Recalculate the position
 			double x_scaled = static_cast< double >( x ) / ( scaling * size.x );
 			double y_scaled = static_cast< double >( y ) / ( scaling * size.y );
 
 			// Calculate the 4D parameters
-			double nx = ( size.x - 1 ) * ( 1 + cos( x_scaled / ( 2 * pi ) ) ) / 2;
-			double ny = ( size.y - 1 ) * ( 1 + cos( y_scaled / ( 2 * pi ) ) ) / 2;
-			double nu = ( size.x - 1 ) * ( 1 + sin( x_scaled / ( 2 * pi ) ) ) / 2;
-			double nv = ( size.y - 1 ) * ( 1 + sin( y_scaled / ( 2 * pi ) ) ) / 2;
+			double nx = ( size.x - 1 ) * ( 1 + cos( x_scaled * ( 2 * pi ) ) ) / 2;
+			double ny = ( size.y - 1 ) * ( 1 + cos( y_scaled * ( 2 * pi ) ) ) / 2;
+			double nu = ( size.x - 1 ) * ( 1 + sin( x_scaled * ( 2 * pi ) ) ) / 2;
+			double nv = ( size.y - 1 ) * ( 1 + sin( y_scaled * ( 2 * pi ) ) ) / 2;
 
 			// Calculate the sides
 			unsigned int x1 = static_cast< unsigned int >( floor( nx ) );
@@ -125,22 +96,22 @@ Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, 
 			double t_v = v_interp * v_interp * ( 3 - 2 * v_interp );
 
 			// Calculate the side values
-			double val_1111 = octave[ x1 ][ y1 ][ u1 ][ v1 ];
-			double val_1112 = octave[ x1 ][ y1 ][ u1 ][ v2 ];
-			double val_1121 = octave[ x1 ][ y1 ][ u2 ][ v1 ];
-			double val_1122 = octave[ x1 ][ y1 ][ u2 ][ v2 ];
-			double val_1211 = octave[ x1 ][ y2 ][ u1 ][ v1 ];
-			double val_1212 = octave[ x1 ][ y2 ][ u1 ][ v2 ];
-			double val_1221 = octave[ x1 ][ y2 ][ u2 ][ v1 ];
-			double val_1222 = octave[ x1 ][ y2 ][ u2 ][ v2 ];
-			double val_2111 = octave[ x2 ][ y1 ][ u1 ][ v1 ];
-			double val_2112 = octave[ x2 ][ y1 ][ u1 ][ v2 ];
-			double val_2121 = octave[ x2 ][ y1 ][ u2 ][ v1 ];
-			double val_2122 = octave[ x2 ][ y1 ][ u2 ][ v2 ];
-			double val_2211 = octave[ x2 ][ y2 ][ u1 ][ v1 ];
-			double val_2212 = octave[ x2 ][ y2 ][ u1 ][ v2 ];
-			double val_2221 = octave[ x2 ][ y2 ][ u2 ][ v1 ];
-			double val_2222 = octave[ x2 ][ y2 ][ u2 ][ v2 ];
+			double val_1111 = noiseFunc4D( seed, x1, y1, u1, v1 );
+			double val_1112 = noiseFunc4D( seed, x1, y1, u1, v2 );
+			double val_1121 = noiseFunc4D( seed, x1, y1, u2, v1 );
+			double val_1122 = noiseFunc4D( seed, x1, y1, u2, v2 );
+			double val_1211 = noiseFunc4D( seed, x1, y2, u1, v1 );
+			double val_1212 = noiseFunc4D( seed, x1, y2, u1, v2 );
+			double val_1221 = noiseFunc4D( seed, x1, y2, u2, v1 );
+			double val_1222 = noiseFunc4D( seed, x1, y2, u2, v2 );
+			double val_2111 = noiseFunc4D( seed, x2, y1, u1, v1 );
+			double val_2112 = noiseFunc4D( seed, x2, y1, u1, v2 );
+			double val_2121 = noiseFunc4D( seed, x2, y1, u2, v1 );
+			double val_2122 = noiseFunc4D( seed, x2, y1, u2, v2 );
+			double val_2211 = noiseFunc4D( seed, x2, y2, u1, v1 );
+			double val_2212 = noiseFunc4D( seed, x2, y2, u1, v2 );
+			double val_2221 = noiseFunc4D( seed, x2, y2, u2, v1 );
+			double val_2222 = noiseFunc4D( seed, x2, y2, u2, v2 );
 
 			// Interpolation over v
 			double val_111 = ( 1 - t_v ) * val_1111 + t_v * val_1112;
@@ -165,11 +136,11 @@ Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, 
 			// Interpolation over x
 			double value = ( 1 - t_x ) * val_1 + t_x * val_2;
 
-			octave_scaled[ x ][ y ] = value;
+			octave[ x ][ y ] = value;
 		}
 	}
 
-	return octave_scaled;
+	return octave;
 }
 
 Array< double, 2 > generateNoise( Vector2ui size, unsigned int octaves, double dropoff, bool tile ) {
@@ -180,35 +151,27 @@ Array< double, 2 > generateNoise( Vector2ui size, unsigned int octaves, double d
 
 Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned int octaves, double dropoff, bool tile ) {
 	// Initialize the noise
-	std::cout << "Initializing noise\n";
 	Array< double, 2 > noise( size.x, size.y );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			noise[ x ][ y ] = 0;
 		}
 	}
-	std::cout << "Noise initialized\n";
 
 	// Loop through the octaves
 	double scaling = 1;
 	double limit = 0;
-	std::cout << "Octave Generation Start\n";
 	for( unsigned int i = 0; i < octaves; ++i ) {
-		std::cout << "Octave #" << i << '\n';
 		Array< double, 2 > octave( size.x, size.y );
 
 		// Untiled octave
 		if( !tile ) {
-			std::cout << "Generating untiled Octave\n";
 			octave = generateNoiseOctaveUntiled( size, seed, scaling );
-			std::cout << "Untiled Octave generated\n";
 		}
 
 		// Tiled octave
 		else {
-			std::cout << "Generating tiled Octave\n";
 			octave = generateNoiseOctaveTiled( size, seed, scaling );
-			std::cout << "Tiled Octave generated\n";
 		}
 
 		// Combine octaves
@@ -222,16 +185,13 @@ Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned in
 		scaling *= 2;
 		limit = limit * dropoff + 1;
 	}
-	std::cout << "Octave Generation End\n";
 
 	// Rescale the noise
-	std::cout << "Rescaling Start\n";
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			noise[ x ][ y ] /= limit;
 		}
 	}
-	std::cout << "Rescaling End\n";
 
 	return noise;
 }

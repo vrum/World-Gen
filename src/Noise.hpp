@@ -7,8 +7,8 @@
 #include "Array.hpp"
 #include "Vector.hpp"
 
-Array< double, 2 > generateNoiseBase2D( Vector2ui size, unsigned int seed );
-Array< double, 4 > generateNoiseBase4D( Vector2ui size, unsigned int seed );
+double noiseFunc2D( unsigned int seed, unsigned int x, unsigned int y );
+double noiseFunc4D( unsigned int seed, unsigned int x, unsigned int y, unsigned int u, unsigned int v );
 
 Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling );
 Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, double scaling );
