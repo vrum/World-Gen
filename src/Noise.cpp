@@ -2,33 +2,34 @@
 // See the LICENSE file in the root directory of the repository for licensing information
 
 #include <cmath>
-#include <cstdint>
 #include <random>
 #include "Noise.hpp"
 
-double noise1D( std::int32_t x ) {
-	std::int32_t seed = x;
-	seed = ( seed << 17 ) ^ seed;
-	seed = ( seed * 727 + 701 );
-	seed = ( seed * 523 + 577 );
-	seed = ( seed * 857 + 397 );
-	double scale = static_cast< double >( UINT32_MAX );
-	return static_cast< double >( *reinterpret_cast< std::uint32_t* >( &seed ) ) / scale;
+double noise1D( double x ) {
+	double seed = x;
+	seed = seed * 727 + 701;
+	seed = seed * 523 - 577;
+	seed = seed * 857 + 397;
+	if( seed < 0 ) {
+		seed *= -1;
+	}
+	seed = seed - floor( seed );
+	return seed;
 }
 
-double noise2D( std::int32_t x, std::int32_t y ) {
+double noise2D( double x, double y ) {
 	return noise1D( x + 13*y );
 }
 
-double noise3D( std::int32_t x, std::int32_t y, std::int32_t z ) {
+double noise3D( double x, double y, double z ) {
 	return noise1D( x + 13*y + 31*z );
 }
 
-double noise4D( std::int32_t x, std::int32_t y, std::int32_t z, std::int32_t t ) {
+double noise4D( double x, double y, double z, double t ) {
 	return noise1D( x + 13*y + 31*z + 71*t );
 }
 
-double noise5D( std::int32_t x, std::int32_t y, std::int32_t z, std::int32_t t, std::int32_t u ) {
+double noise5D( double x, double y, double z, double t, double u ) {
 	return noise1D( x + 13*y + 31*z + 71*t + 41*u );
 }
 

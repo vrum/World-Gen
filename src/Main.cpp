@@ -17,12 +17,12 @@ int main( int argc, char* argv[] ) {
 	}
 
 	Vector2ui size;
-	size.x = std::stoul( std::string( argv[ 1 ] ) );
-	size.y = std::stoul( std::string( argv[ 2 ] ) );
+	size.x = static_cast< unsigned int >( std::stoul( std::string( argv[ 1 ] ) ) );
+	size.y = static_cast< unsigned int >( std::stoul( std::string( argv[ 2 ] ) ) );
 
 	unsigned int layers = 8;
 	if( argc >= 4 + 1 ) {
-		layers = std::stoul( std::string( argv[ 4 ] ) );
+		layers = static_cast< unsigned int >( std::stoul( std::string( argv[ 4 ] ) ) );
 	}
 	double persistence = 0.8;
 	if( argc >= 5 + 1 ) {
