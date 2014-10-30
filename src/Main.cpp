@@ -30,9 +30,7 @@ int main( int argc, char* argv[] ) {
 	}
 
 	// Generate noise
-	std::cout << "Noise Generation Start\n";
 	Array2D< double > noise = generateNoise( size, layers, persistence, true );
-	std::cout << "Noise Generation End\n";
 
 	// Write the noise to an image
 	sf::Image noisy_image;

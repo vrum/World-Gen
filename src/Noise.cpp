@@ -2,23 +2,30 @@
 // See the LICENSE file in the root directory of the repository for licensing information
 
 #include <cmath>
+#include <cstdint>
 #include <random>
 #include "Noise.hpp"
 
 static double pi = 3.14159265358979;
 
-double noiseFunc2D( unsigned int seed, unsigned int x, unsigned int y) {
-	std::mt19937_64 prng_engine( seed + 13*x + 29*y );
-	std::uniform_real_distribution< double > prng;
+double noiseFunc2D( unsigned int seed, unsigned int x, unsigned int y ) {
+	std::uint32_t out = seed + 13*x + 251*y;
+	out = ( out << 17 ) ^ out;
+	out = out * 4643 + 6047;
+	out = out * 13921 + 52543;
+	out = out * ( UINT32_MAX - out ) * 96053 - 104711;
 
-	return prng( prng_engine );
+	return static_cast< double >( out ) / static_cast< double >( UINT32_MAX );
 }
 
 double noiseFunc4D( unsigned int seed, unsigned int x, unsigned int y, unsigned int u, unsigned int v ) {
-	std::mt19937_64 prng_engine( seed + 13*x + 29*y + 51*u + 67*v );
-	std::uniform_real_distribution< double > prng;
+	std::uint32_t out = seed + 13*x + 251*y + 29*u + 647*v;
+	out = ( out << 17 ) ^ out;
+	out = out * 4643 + 6047;
+	out = out * 13921 + 52543;
+	out = out * ( UINT32_MAX - out ) * 96053 - 104711;
 
-	return prng( prng_engine );
+	return static_cast< double >( out ) / static_cast< double >( UINT32_MAX );
 }
 
 Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling ) {
@@ -66,14 +73,17 @@ Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, 
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			// Recalculate the position
-			double x_scaled = static_cast< double >( x ) / ( scaling * size.x );
-			double y_scaled = static_cast< double >( y ) / ( scaling * size.y );
+			double x_norm = static_cast< double >( x ) / ( scaling * size.x );
+			double y_norm = static_cast< double >( y ) / ( scaling * size.y );
+
+			// @todo Account for the fact that more scaled layers do NOT loop properly
+			// @todo i.e. They only ever reach a fraction of a rotation
 
 			// Calculate the 4D parameters
-			double nx = ( size.x - 1 ) * ( 1 + cos( x_scaled * ( 2 * pi ) ) ) / 2;
-			double ny = ( size.y - 1 ) * ( 1 + cos( y_scaled * ( 2 * pi ) ) ) / 2;
-			double nu = ( size.x - 1 ) * ( 1 + sin( x_scaled * ( 2 * pi ) ) ) / 2;
-			double nv = ( size.y - 1 ) * ( 1 + sin( y_scaled * ( 2 * pi ) ) ) / 2;
+			double nx = size.x * ( 1 + cos( x_norm * ( 2 * pi ) ) ) / 2;
+			double ny = size.y * ( 1 + cos( y_norm * ( 2 * pi ) ) ) / 2;
+			double nu = size.x * ( 1 + sin( x_norm * ( 2 * pi ) ) ) / 2;
+			double nv = size.y * ( 1 + sin( y_norm * ( 2 * pi ) ) ) / 2;
 
 			// Calculate the sides
 			unsigned int x1 = static_cast< unsigned int >( floor( nx ) );
