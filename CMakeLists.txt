@@ -29,8 +29,10 @@ set(VERSION_PATCH 0)
 set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Array.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MapWriter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Vector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/World.cpp
 )
 
 # Set the output directory

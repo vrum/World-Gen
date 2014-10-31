@@ -15,7 +15,7 @@ double noiseFunc2D( unsigned int seed, unsigned int x, unsigned int y ) {
 	out = out * 13921 + 52543;
 	out = out * ( UINT32_MAX - out ) * 96053 - 104711;
 
-	return static_cast< double >( out ) / static_cast< double >( UINT32_MAX );
+	return ( 2 * static_cast< double >( out ) / static_cast< double >( UINT32_MAX ) ) - 1;
 }
 
 double noiseFunc4D( unsigned int seed, unsigned int x, unsigned int y, unsigned int u, unsigned int v ) {
@@ -25,7 +25,7 @@ double noiseFunc4D( unsigned int seed, unsigned int x, unsigned int y, unsigned 
 	out = out * 13921 + 52543;
 	out = out * ( UINT32_MAX - out ) * 96053 - 104711;
 
-	return static_cast< double >( out ) / static_cast< double >( UINT32_MAX );
+	return ( 2 * static_cast< double >( out ) / static_cast< double >( UINT32_MAX ) ) - 1;
 }
 
 Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling ) {

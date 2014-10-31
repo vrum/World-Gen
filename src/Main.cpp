@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string>
 #include <SFML/Graphics/Image.hpp>
-#include "Noise.hpp"
+#include "MapWriter.hpp"
+#include "World.hpp"
 
 int main( int argc, char* argv[] ) {
 	// Read command-line arguments
@@ -29,37 +30,18 @@ int main( int argc, char* argv[] ) {
 		persistence = std::stod( std::string( argv[ 5 ] ) );
 	}
 
-	// Generate noise
-	Array2D< double > noise = generateNoise( size, layers, persistence, true );
+	// Generate the world
+	World world;
+	world.size = size;
+	world.octaves = layers;
+	world.persistence = persistence;
+	world.generateWorld();
 
-	// Write the noise to an image
-	sf::Image noisy_image;
-	noisy_image.create( size.x, size.y );
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			sf::Color pixel_color;
-
-			/*
-			// Land
-			if( noise[ x ][ y ] > 0.1 ) {
-				pixel_color = sf::Color::Green;
-			}
-			// Water
-			else {
-				pixel_color = sf::Color::Blue;
-			}
-			*/
-
-			pixel_color.r = static_cast< std::uint8_t >( 255 * noise[ x ][ y ] );
-			pixel_color.g = static_cast< std::uint8_t >( 255 * noise[ x ][ y ] );
-			pixel_color.b = static_cast< std::uint8_t >( 255 * noise[ x ][ y ] );
-
-			noisy_image.setPixel( x, y, pixel_color );
-		}
-	}
-
-	// Save the image
-	noisy_image.saveToFile( std::string( argv[ 3 ] ) );
+	// Write the world to a file
+	MapWriter writer;
+	writer.setWorld( world );
+	writer.writeHeightMap( "Heightmap_" + std::string( argv[ 3 ] ) );
+	writer.writeTemperatureMap( "Temperature_" + std::string( argv[ 3 ] ) );
 
 	return 0;
 }
