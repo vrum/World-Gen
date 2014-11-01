@@ -28,10 +28,15 @@ class World {
 		Array< double, 2 > getWindMapX() const;
 		Array< double, 2 > getWindMapY() const;
 
+		double       land_temperature_adjust;
 		unsigned int iterations;
+		double       iteration_mixer;
+		double       iteration_precision;
 		unsigned int octaves;
 		double       persistence;
+		double       pressure_scale;
 		double       sea_level;
+		double       sea_temperature_adjust;
 		unsigned int seed;
 		Vector2ui    size;
 		double       temperature_noise;

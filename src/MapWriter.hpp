@@ -15,6 +15,7 @@ class MapWriter {
 
 		void writeHeightMap( std::string filename );
 		void writeTemperatureMap( std::string filename );
+		void writeWindMap( std::string filename );
 };
 
 #endif // MAPWRITER_HPP

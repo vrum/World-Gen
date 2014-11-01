@@ -79,3 +79,28 @@ void MapWriter::writeTemperatureMap( std::string filename ) {
 
 	image.saveToFile( filename );
 }
+
+void MapWriter::writeWindMap( std::string filename ) {
+	Array< double, 2 > windmap_x = m_world.getWindMapX();
+	Array< double, 2 > windmap_y = m_world.getWindMapY();
+	Vector2ui size = m_world.size;
+
+	sf::Image image;
+	image.create( size.x, size.y );
+	for( unsigned int x = 0; x < size.x; ++x ) {
+		for( unsigned int y = 0; y < size.y; ++y ) {
+			sf::Color pixel_color;
+
+			double wind_x = windmap_x[ x ][ y ];
+			double wind_y = windmap_y[ x ][ y ];
+
+			pixel_color.r = 0;
+			pixel_color.g = static_cast< std::uint8_t >( ( wind_x + 1. ) / 2. * 255 );
+			pixel_color.b = static_cast< std::uint8_t >( ( wind_y + 1. ) / 2. * 255 );
+
+			image.setPixel( x, y, pixel_color );
+		}
+	}
+
+	image.saveToFile( filename );
+}

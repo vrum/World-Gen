@@ -42,6 +42,7 @@ int main( int argc, char* argv[] ) {
 	writer.setWorld( world );
 	writer.writeHeightMap( "Heightmap_" + std::string( argv[ 3 ] ) );
 	writer.writeTemperatureMap( "Temperature_" + std::string( argv[ 3 ] ) );
+	writer.writeWindMap( "Wind_" + std::string( argv[ 3 ] ) );
 
 	return 0;
 }
