@@ -68,13 +68,18 @@ Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed
 }
 
 Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, double scaling ) {
+	// Temporarily rescale
+	Vector2ui full_size = size;
+	size.x /= scaling;
+	size.y /= scaling;
+
 	// Create the octave
 	Array< double, 2 > octave( size.x, size.y );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
 			// Recalculate the position
-			double x_norm = static_cast< double >( x ) / ( scaling * size.x );
-			double y_norm = static_cast< double >( y ) / ( scaling * size.y );
+			double x_norm = static_cast< double >( x ) / static_cast< double >( size.x );
+			double y_norm = static_cast< double >( y ) / static_cast< double >( size.y );
 
 			// @todo Account for the fact that more scaled layers do NOT loop properly
 			// @todo i.e. They only ever reach a fraction of a rotation
@@ -150,7 +155,48 @@ Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, 
 		}
 	}
 
-	return octave;
+	// Scale the octave
+	Array< double, 2 > full_octave( full_size.x, full_size.y );
+	for( unsigned int x = 0; x < full_size.x; ++x ) {
+		for( unsigned int y = 0; y < full_size.y; ++y ) {
+			// Find the scaled down coordinates
+			double x_scaled = static_cast< double >( x ) / scaling;
+			double y_scaled = static_cast< double >( y ) / scaling;
+			unsigned int left = static_cast< unsigned int >( floor( x_scaled ) );
+			unsigned int right = static_cast< unsigned int >( ceil( x_scaled ) );
+			unsigned int top = static_cast< unsigned int >( floor( y_scaled ) );
+			unsigned int bottom = static_cast< unsigned int >( ceil( y_scaled ) );
+
+			// Prevent bad coordinate access
+			if( right >= size.x ) {
+				right = 0;
+			}
+			if( bottom >= size.y ) {
+				bottom = 0;
+			}
+
+			// Get the interpolation factors
+			double x_interp = x_scaled - floor( x_scaled );
+			double y_interp = y_scaled - floor( y_scaled );
+			double t_x = x_interp * x_interp * ( 3. - 2. * x_interp );
+			double t_y = y_interp * y_interp * ( 3. - 2. * y_interp );
+
+			// Get the values
+			double topleft_val = octave[ left ][ top ];
+			double topright_val = octave[ right ][ top ];
+			double bottomleft_val = octave[ left ][ bottom ];
+			double bottomright_val = octave[ right ][ bottom ];
+
+			// Interpolate down to one value
+			double left_val = ( 1. - t_y ) * topleft_val + t_y * bottomleft_val;
+			double right_val = ( 1. - t_y ) * topright_val + t_y * bottomright_val;
+			double value = ( 1. - t_x ) * left_val + t_x * right_val;
+
+			full_octave[ x ][ y ] = value;
+		}
+	}
+
+	return full_octave;
 }
 
 Array< double, 2 > generateNoise( Vector2ui size, unsigned int octaves, double dropoff, bool tile ) {
@@ -173,6 +219,12 @@ Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned in
 	double limit = 0;
 	for( unsigned int i = 0; i < octaves; ++i ) {
 		Array< double, 2 > octave( size.x, size.y );
+
+		// Ensure we don't have overly large frequencies
+		if( scaling > size.x || scaling > size.y ) {
+			double minimum_size = ( size.x < size.y ? static_cast< double >( size.x ) : static_cast< double >( size.y ) );
+			scaling = exp2( floor( log2( minimum_size ) ) );
+		}
 
 		// Untiled octave
 		if( !tile ) {
