@@ -15,6 +15,7 @@ class World {
 		Array< double, 2 > m_wind_map_y;
 
 		Array< double, 2 > m_temperature_base_map;
+		Array< double, 2 > m_wind_x_base_map;
 
 		void updateMaps();
 
@@ -28,6 +29,7 @@ class World {
 		Array< double, 2 > getWindMapX() const;
 		Array< double, 2 > getWindMapY() const;
 
+		double       elevation_dropoff;
 		double       land_temperature_adjust;
 		unsigned int iterations;
 		double       iteration_mixer;
@@ -41,6 +43,7 @@ class World {
 		Vector2ui    size;
 		double       temperature_noise;
 		double       wind_noise;
+		double       wind_speed;
 };
 
 #endif // WORLD_HPP

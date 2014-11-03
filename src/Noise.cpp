@@ -216,14 +216,12 @@ Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned in
 
 	// Loop through the octaves
 	double scaling = 1;
-	double limit = 0;
 	for( unsigned int i = 0; i < octaves; ++i ) {
 		Array< double, 2 > octave( size.x, size.y );
 
 		// Ensure we don't have overly large frequencies
 		if( scaling > size.x || scaling > size.y ) {
-			double minimum_size = ( size.x < size.y ? static_cast< double >( size.x ) : static_cast< double >( size.y ) );
-			scaling = exp2( floor( log2( minimum_size ) ) );
+			break;
 		}
 
 		// Untiled octave
@@ -245,13 +243,38 @@ Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned in
 
 		// Update octave parameters
 		scaling *= 2;
-		limit = limit * dropoff + 1;
 	}
 
-	// Rescale the noise
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			noise[ x ][ y ] /= limit;
+	// Normalize the noise
+	noise = normalizeNoise( noise );
+
+	return noise;
+}
+
+#include <iostream>
+
+Array< double, 2 > normalizeNoise( Array< double, 2 > noise, bool extend ) {
+	double extent = 1.;
+	if( extend ) {
+		extent = 0.;
+	}
+
+	// Loop through once to find the maximum absolute value of the noise
+	for( unsigned int x = 0; x < noise.size( 0 ); ++x ) {
+		for( unsigned int y = 0; y < noise.size( 1 ); ++y ) {
+			extent = ( std::abs( noise[ x ][ y ] ) > extent ? std::abs( noise[ x ][ y ] ) : extent );
+		}
+	}
+
+	// Ensure we don't divide by 0
+	if( extent == 0. ) {
+		extent = 1;
+	}
+
+	// Loop through again to normalize
+	for( unsigned int x = 0; x < noise.size( 0 ); ++x ) {
+		for( unsigned int y = 0; y < noise.size( 1 ); ++y ) {
+			noise[ x ][ y ] /= extent;
 		}
 	}
 

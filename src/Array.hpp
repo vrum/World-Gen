@@ -15,7 +15,7 @@ template< class T, std::size_t D > class Array {
 		template< typename... Args > void setSizes( std::size_t index, std::size_t size, Args... args ) {
 			setSizes( index, size );
 
-			setSizes( index, args... );
+			setSizes( index + 1, args... );
 		}
 
 		void setSizes( std::size_t index, std::size_t size ) {

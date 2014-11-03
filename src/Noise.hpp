@@ -17,4 +17,6 @@ Array< double, 2 > generateNoise( Vector2ui size, unsigned int octaves = 8, doub
 Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned int octaves = 8, double dropoff = 0.5,
 								  bool tile = true );
 
+Array< double, 2 > normalizeNoise( Array< double, 2 > noise, bool extend = false );
+
 #endif // NOISE_HPP
