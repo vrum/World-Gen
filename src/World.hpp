@@ -10,13 +10,23 @@
 class World {
 	private:
 		Array< double, 2 > m_height_map;
-		Array< double, 2 > m_temperature_map;
-		Array< double, 2 > m_wind_map_x;
-		Array< double, 2 > m_wind_map_y;
+		Array< double, 2 > m_heat_map;
 
-		Array< double, 2 > m_temperature_base_map;
-		Array< double, 2 > m_wind_x_base_map;
+		Array< double, 2 > m_heat_source_map;
 
+		double       m_elevation_heat_dropoff;
+		double       m_heat_noise;
+		bool         m_height_map_generated;
+		double       m_land_heat_adjust;
+		unsigned int m_octaves;
+		double       m_persistence;
+		double       m_sea_heat_adjust;
+		double       m_sea_level;
+		unsigned int m_seed;
+		Vector2ui    m_size;
+
+		void generateHeatMap();
+		void generateHeatSourceMap();
 		void updateMaps();
 
 	public:
@@ -24,26 +34,32 @@ class World {
 
 		void generateWorld();
 
-		Array< double, 2 > getHeightMap() const;
-		Array< double, 2 > getTemperatureMap() const;
-		Array< double, 2 > getWindMapX() const;
-		Array< double, 2 > getWindMapY() const;
+		void generateHeightMap();
+		void generateAuxillaryMaps();
 
-		double       elevation_dropoff;
-		double       land_temperature_adjust;
-		unsigned int iterations;
-		double       iteration_mixer;
-		double       iteration_precision;
-		unsigned int octaves;
-		double       persistence;
-		double       pressure_scale;
-		double       sea_level;
-		double       sea_temperature_adjust;
-		unsigned int seed;
-		Vector2ui    size;
-		double       temperature_noise;
-		double       wind_noise;
-		double       wind_speed;
+		Array< double, 2 > getHeightMap() const;
+		Array< double, 2 > getHeatMap()   const;
+
+		double       getHeatDropoff() const;
+		double       getHeatNoise()   const;
+		double       getLandHeat()    const;
+		unsigned int getOctaves()     const;
+		double       getPersistence() const;
+		double       getSeaHeat()     const;
+		double       getSeaLevel()    const;
+		unsigned int getSeed()        const;
+		Vector2ui    getSize()        const;
+
+		void setHeatDropoff( double heat_dropoff );
+		void setHeatNoise( double heat_noise );
+		void setLandHeat( double land_heat );
+		void setOctaves( unsigned int octaves );
+		void setPersistence( double persistence );
+		void setSeaHeat( double sea_heat );
+		void setSeaLevel( double sea_level );
+		void setSeed();
+		void setSeed( unsigned int seed );
+		void setSize( Vector2ui size );
 };
 
 #endif // WORLD_HPP

@@ -32,17 +32,16 @@ int main( int argc, char* argv[] ) {
 
 	// Generate the world
 	World world;
-	world.size = size;
-	world.octaves = layers;
-	world.persistence = persistence;
+	world.setSize( size );
+	world.setOctaves( layers );
+	world.setPersistence( persistence );
 	world.generateWorld();
 
 	// Write the world to a file
 	MapWriter writer;
 	writer.setWorld( world );
 	writer.writeHeightMap( "Heightmap_" + std::string( argv[ 3 ] ) );
-	writer.writeTemperatureMap( "Temperature_" + std::string( argv[ 3 ] ) );
-	writer.writeWindMap( "Wind_" + std::string( argv[ 3 ] ) );
+	writer.writeHeatMap( "Heat_" + std::string( argv[ 3 ] ) );
 
 	return 0;
 }

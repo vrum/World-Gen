@@ -8,173 +8,175 @@
 
 World::World() :
 	m_height_map( 0u, 0u ),
-	m_temperature_map( 0u, 0u ),
-	m_wind_map_x( 0u, 0u ),
-	m_wind_map_y( 0u, 0u ),
-	m_temperature_base_map( 0u, 0u ),
-	m_wind_x_base_map( 0u, 0u ) {
+	m_heat_map( 0u, 0u ),
+	m_heat_source_map( 0u, 0u ) {
 	std::random_device entropy;
-	elevation_dropoff       = 0.5;
-	land_temperature_adjust = 0.05;
-	iterations              = 64;
-	iteration_mixer         = .01;
-	iteration_precision     = .1;
-	octaves                 = 8;
-	persistence             = 0.5;
-	pressure_scale          = 10;
-	sea_level               = 0.;
-	sea_temperature_adjust  = -0.05;
-	seed                    = entropy();
-	size                    = { 0, 0 };
-	temperature_noise       = 0.;
-	wind_noise              = 0.;
-	wind_speed              = 0.5;
+	m_elevation_heat_dropoff = 0.5;
+	m_heat_noise             = 0.01;
+	m_height_map_generated   = false;
+	m_land_heat_adjust       = 0.05;
+	m_octaves                = 8;
+	m_persistence            = 0.5;
+	m_sea_heat_adjust        = -0.05;
+	m_sea_level              = 0.;
+	m_seed                   = entropy();
+	m_size                   = { 0u, 0u };
+}
+
+void World::generateAuxillaryMaps() {
+	if( !m_height_map_generated ) {
+		generateHeightMap();
+	}
+
+	generateHeatSourceMap();
+	generateHeatMap();
+}
+
+void World::generateHeatMap() {
+	// Use the source map to generate the heat map
+	m_heat_map = m_heat_source_map;
+
+	// Generate some noise
+	Array< double, 2 > heat_noise = generateNoise( m_size, m_seed + 1, m_octaves, m_persistence, true );
+
+	// Then add in the noise
+	for( unsigned int x = 0; x < m_size.x; ++x ) {
+		for( unsigned int y = 0; y < m_size.y; ++y ) {
+			m_heat_map[ x ][ y ] += m_heat_noise * ( heat_noise[ x ][ y ] - m_heat_map[ x ][ y ] );
+		}
+	}
+
+	// Renormalize the heatmap
+	m_heat_map = normalizeNoise( m_heat_map );
+}
+
+void World::generateHeatSourceMap() {
+	// Iterate the pixels
+	m_heat_source_map = Array< double, 2 >( m_size.x, m_size.y );
+	for( unsigned int x = 0; x < m_size.x; ++x ) {
+		for( unsigned int y = 0; y < m_size.y; ++y ) {
+			// Set the temperature based on:
+			// -Distance from the equator
+			// -Whether the point is land or sea
+			// -The elevation if on land
+			double y_norm = static_cast< double >( y ) / static_cast< double >( m_size.y );
+			double equator_distance = 1. - 4. * std::abs( y_norm - 0.5 );
+			double elevation = m_height_map[ x ][ y ] - m_sea_level;
+			double location_heat_adjustment = ( elevation > 0. ?
+												m_land_heat_adjust - m_elevation_heat_dropoff * elevation :
+												m_sea_heat_adjust );
+			m_heat_source_map[ x ][ y ] = equator_distance + location_heat_adjustment;
+		}
+	}
+
+	// Normalize the heat source map
+	m_heat_source_map = normalizeNoise( m_heat_source_map );
+}
+
+void World::generateHeightMap() {
+	// Create the height map
+	m_height_map = generateNoise( m_size, m_seed, m_octaves, m_persistence, true );
+
+	// Extend it to the full range
+	m_height_map = normalizeNoise( m_height_map, true );
+
+	m_height_map_generated = true;
 }
 
 void World::generateWorld() {
-	// Start with the height map
-	m_height_map = generateNoise( size, seed, octaves, persistence, true );
+	// Generate the height map first
+	generateHeightMap();
 
-	// Extend the height map
-	m_height_map = normalizeNoise( m_height_map, true );
-
-	// Construct the base maps
-	m_temperature_base_map = Array< double, 2 >( size.x, size.y );
-	m_wind_x_base_map = Array< double, 2 >( size.x, size.y );
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			double y_norm = static_cast< double >( y ) / static_cast< double >( size.y );
-			double eq_dist = 1. - 4. * std::abs( y_norm - 0.5 );
-			double elevation = m_height_map[ x ][ y ] - sea_level;
-			double location_adjust = ( elevation > 0. ?
-									   land_temperature_adjust - elevation_dropoff * elevation :
-									   sea_temperature_adjust );
-			m_temperature_base_map[ x ][ y ] = eq_dist + location_adjust;
-			m_wind_x_base_map[ x ][ y ] = wind_speed * eq_dist;
-		}
-	}
-	m_temperature_base_map = normalizeNoise( m_temperature_base_map );
-	m_wind_x_base_map = normalizeNoise( m_wind_x_base_map );
-
-	// Initialize the other maps
-	m_temperature_map = generateNoise( size, seed + 1, octaves, persistence, true ) * temperature_noise;
-	m_wind_map_x = generateNoise( size, seed + 2, octaves, persistence, true ) * wind_noise;
-	m_wind_map_y = generateNoise( size, seed + 3, octaves, persistence, true ) * wind_noise;
-
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			m_temperature_map[ x ][ y ] += m_temperature_base_map[ x ][ y ];
-			m_wind_map_x[ x ][ y ] += m_wind_x_base_map[ x ][ y ];
-		}
-	}
-
-	m_temperature_map = normalizeNoise( m_temperature_map );
-	m_wind_map_x = normalizeNoise( m_wind_map_x );
-
-	// Feed the other maps into each other
-	for( unsigned int i = 1; i < iterations; ++i ) {
-		updateMaps();
-	}
+	// Then construct the auxillary maps
+	generateAuxillaryMaps();
 }
 
 Array< double, 2 > World::getHeightMap() const {
 	return m_height_map;
 }
 
-Array< double, 2 > World::getTemperatureMap() const {
-	return m_temperature_map;
+Array< double, 2 > World::getHeatMap() const {
+	return m_heat_map;
 }
 
-Array< double, 2 > World::getWindMapX() const {
-	return m_wind_map_x;
+double World::getHeatDropoff() const {
+	return m_elevation_heat_dropoff;
 }
 
-Array< double, 2 > World::getWindMapY() const {
-	return m_wind_map_y;
+double World::getHeatNoise() const {
+	return m_heat_noise;
 }
 
-void World::updateMaps() {
-	// Create copies of the maps
-	Array< double, 2 > temp_map_old = m_temperature_map;
-	Array< double, 2 > wind_map_x_old = m_wind_map_x;
-	Array< double, 2 > wind_map_y_old = m_wind_map_y;
+double World::getLandHeat() const {
+	return m_land_heat_adjust;
+}
 
-	// Do the calculations
-	Array< double, 2 > temp_grad_x( size.x, size.y );
-	Array< double, 2 > temp_grad_y( size.x, size.y );
-	Array< double, 2 > wind_x_grad_x( size.x, size.y );
-	Array< double, 2 > wind_x_grad_y( size.x, size.y );
-	Array< double, 2 > wind_y_grad_x( size.x, size.y );
-	Array< double, 2 > wind_y_grad_y( size.x, size.y );
-	Array< double, 2 > wind_divergence( size.x, size.y );
-	for( unsigned int x = 0; x < size.x; ++x ) {
-		for( unsigned int y = 0; y < size.y; ++y ) {
-			// Gradients
-			// Left edge
-			if( x == 0 ) {
-				temp_grad_x[ x ][ y ] = ( temp_map_old[ 1 ][ y ] - temp_map_old[ size.x - 1 ][ y ] ) / 2.;
-				wind_x_grad_x[ x ][ y ] = ( wind_map_x_old[ 1 ][ y ] - wind_map_x_old[ size.x - 1 ][ y ] ) / 2.;
-				wind_y_grad_x[ x ][ y ] = ( wind_map_y_old[ 1 ][ y ] - wind_map_y_old[ size.x - 1 ][ y ] ) / 2.;
-			}
-			// Right edge
-			else if( x == size.x - 1 ) {
-				temp_grad_x[ x ][ y ] = ( temp_map_old[ 0 ][ y ] - temp_map_old[ size.x - 2 ][ y ] ) / 2.;
-				wind_x_grad_x[ x ][ y ] = ( wind_map_x_old[ 0 ][ y ] - wind_map_x_old[ size.x - 2 ][ y ] ) / 2.;
-				wind_y_grad_x[ x ][ y ] = ( wind_map_y_old[ 0 ][ y ] - wind_map_y_old[ size.x - 2 ][ y ] ) / 2.;
-			}
-			// Middle
-			else {
-				temp_grad_x[ x ][ y ] = ( temp_map_old[ x + 1 ][ y ] - temp_map_old[ x - 1 ][ y ] ) / 2.;
-				wind_x_grad_x[ x ][ y ] = ( wind_map_x_old[ x + 1 ][ y ] - wind_map_x_old[ x - 1 ][ y ] ) / 2.;
-				wind_y_grad_x[ x ][ y ] = ( wind_map_y_old[ x + 1 ][ y ] - wind_map_y_old[ x - 1 ][ y ] ) / 2.;
-			}
+unsigned int World::getOctaves() const {
+	return m_octaves;
+}
 
-			// Top edge
-			if( y == 0 ) {
-				temp_grad_y[ x ][ y ] = ( temp_map_old[ x ][ 1 ] - temp_map_old[ x ][ size.y - 1 ] ) / 2.;
-				wind_x_grad_y[ x ][ y ] = ( wind_map_x_old[ x ][ 1 ] - wind_map_x_old[ x ][ size.y - 1 ] ) / 2.;
-				wind_y_grad_y[ x ][ y ] = ( wind_map_y_old[ x ][ 1 ] - wind_map_y_old[ x ][ size.y - 1 ] ) / 2.;
-			}
-			// Bottom edge
-			else if( y == size.y - 1 ) {
-				temp_grad_y[ x ][ y ] = ( temp_map_old[ x ][ 0 ] - temp_map_old[ x ][ size.y - 2 ] ) / 2.;
-				wind_x_grad_y[ x ][ y ] = ( wind_map_x_old[ x ][ 0 ] - wind_map_x_old[ x ][ size.y - 2 ] ) / 2.;
-				wind_y_grad_y[ x ][ y ] = ( wind_map_y_old[ x ][ 0 ] - wind_map_y_old[ x ][ size.y - 2 ] ) / 2.;
-			}
-			// Middle
-			else {
-				temp_grad_y[ x ][ y ] = ( temp_map_old[ x ][ y + 1 ] - temp_map_old[ x ][ y - 1 ] ) / 2.;
-				wind_x_grad_y[ x ][ y ] = ( wind_map_x_old[ x ][ y + 1 ] - wind_map_x_old[ x ][ y - 1 ] ) / 2.;
-				wind_y_grad_y[ x ][ y ] = ( wind_map_y_old[ x ][ y + 1 ] - wind_map_y_old[ x ][ y - 1 ] ) / 2.;
-			}
+double World::getPersistence() const {
+	return m_persistence;
+}
 
-			// Wind divergence
-			wind_divergence[ x ][ y ] = wind_x_grad_x[ x ][ y ] + wind_y_grad_y[ x ][ y ];
+double World::getSeaHeat() const {
+	return m_sea_heat_adjust;
+}
 
-			// Update temperature using wind flow and wind flow using temperature gradients
-			double delta_temp = temp_map_old[ x ][ y ] * wind_divergence[ x ][ y ] +
-								wind_map_x_old[ x ][ y ] * temp_grad_x[ x ][ y ] +
-								wind_map_y_old[ x ][ y ] * temp_grad_y[ x ][ y ];
-			double delta_wind_x = pressure_scale * temp_grad_x[ x ][ y ] +
-								  wind_map_x_old[ x ][ y ] * wind_x_grad_x[ x ][ y ] +
-								  wind_map_y_old[ x ][ y ] * wind_x_grad_y[ x ][ y ];
-			double delta_wind_y = pressure_scale * temp_grad_y[ x ][ y ] +
-								  wind_map_x_old[ x ][ y ] * wind_y_grad_x[ x ][ y ] +
-								  wind_map_y_old[ x ][ y ] * wind_y_grad_y[ x ][ y ];
-			m_temperature_map[ x ][ y ] -= iteration_precision * delta_temp;
-			m_wind_map_x[ x ][ y ] -= iteration_precision * delta_wind_x;
-			m_wind_map_y[ x ][ y ] -= iteration_precision * delta_wind_y;
+double World::getSeaLevel() const {
+	return m_sea_level;
+}
 
-			// Average with the base maps (since they represent sources)
-			m_temperature_map[ x ][ y ] = iteration_mixer * m_temperature_map[ x ][ y ] +
-										  ( 1. - iteration_mixer ) * m_temperature_base_map[ x ][ y ];
-			m_wind_map_x[ x ][ y ] = iteration_mixer * m_wind_map_x[ x ][ y ] +
-									 ( 1. - iteration_mixer ) * m_wind_x_base_map[ x ][ y ];
-		}
-	}
+unsigned int World::getSeed() const {
+	return m_seed;
+}
 
-	// Renormalize the maps
-	m_temperature_map = normalizeNoise( m_temperature_map );
-	m_wind_map_x = normalizeNoise( m_wind_map_x );
-	m_wind_map_y = normalizeNoise( m_wind_map_y );
+Vector2ui World::getSize() const {
+	return m_size;
+}
+
+void World::setHeatDropoff( double heat_dropoff ) {
+	m_elevation_heat_dropoff = heat_dropoff;
+}
+
+void World::setHeatNoise( double heat_noise ) {
+	m_heat_noise = heat_noise;
+}
+
+void World::setLandHeat( double land_heat ) {
+	m_land_heat_adjust = land_heat;
+}
+
+void World::setOctaves( unsigned int octaves ) {
+	m_octaves = octaves;
+	m_height_map_generated = false;
+}
+
+void World::setPersistence( double persistence ) {
+	m_persistence = persistence;
+	m_height_map_generated = false;
+}
+
+void World::setSeaHeat( double sea_heat ) {
+	m_sea_heat_adjust = sea_heat;
+}
+
+void World::setSeaLevel( double sea_level ) {
+	m_sea_level = sea_level;
+}
+
+void World::setSeed() {
+	std::random_device entropy;
+	m_seed = entropy();
+	m_height_map_generated = false;
+}
+
+void World::setSeed( unsigned int seed ) {
+	m_seed = seed;
+	m_height_map_generated = false;
+}
+
+void World::setSize( Vector2ui size ) {
+	m_size = size;
+	m_height_map_generated = false;
 }
