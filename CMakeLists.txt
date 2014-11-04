@@ -37,6 +37,7 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Noise.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Vector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/World.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/QSFML.cpp
 )
 
 # Set the output directory
