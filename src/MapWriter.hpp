@@ -4,6 +4,7 @@
 #ifndef MAPWRITER_HPP
 #define MAPWRITER_HPP
 
+#include <SFML/Graphics/Image.hpp>
 #include "World.hpp"
 
 class MapWriter {
@@ -13,8 +14,11 @@ class MapWriter {
 	public:
 		void setWorld( World& world );
 
-		void writeHeightMap( std::string filename );
-		void writeHeatMap( std::string filename );
+		sf::Image writeHeightMapToImage();
+		sf::Image writeHeatMapToImage();
+
+		void writeHeightMapToFile( std::string filename );
+		void writeHeatMapToFile( std::string filename );
 };
 
 #endif // MAPWRITER_HPP

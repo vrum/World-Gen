@@ -8,7 +8,13 @@ void MapWriter::setWorld( World& world ) {
 	m_world = world;
 }
 
-void MapWriter::writeHeatMap( std::string filename ) {
+void MapWriter::writeHeatMapToFile( std::string filename ) {
+	sf::Image image = writeHeatMapToImage();
+
+	image.saveToFile( filename );
+}
+
+sf::Image MapWriter::writeHeatMapToImage() {
 	Array< double, 2 > heatmap = m_world.getHeatMap();
 	Vector2ui size = m_world.getSize();
 
@@ -41,10 +47,16 @@ void MapWriter::writeHeatMap( std::string filename ) {
 		}
 	}
 
+	return image;
+}
+
+void MapWriter::writeHeightMapToFile( std::string filename ) {
+	sf::Image image = writeHeightMapToImage();
+
 	image.saveToFile( filename );
 }
 
-void MapWriter::writeHeightMap( std::string filename ) {
+sf::Image MapWriter::writeHeightMapToImage() {
 	Array< double, 2 > heightmap = m_world.getHeightMap();
 	Vector2ui size = m_world.getSize();
 	double sea_level = m_world.getSeaLevel();
@@ -78,5 +90,5 @@ void MapWriter::writeHeightMap( std::string filename ) {
 		}
 	}
 
-	image.saveToFile( filename );
+	return image;
 }

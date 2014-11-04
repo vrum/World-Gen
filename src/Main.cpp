@@ -40,8 +40,8 @@ int main( int argc, char* argv[] ) {
 	// Write the world to a file
 	MapWriter writer;
 	writer.setWorld( world );
-	writer.writeHeightMap( "Heightmap_" + std::string( argv[ 3 ] ) );
-	writer.writeHeatMap( "Heat_" + std::string( argv[ 3 ] ) );
+	writer.writeHeightMapToFile( "Heightmap_" + std::string( argv[ 3 ] ) );
+	writer.writeHeatMapToFile( "Heat_" + std::string( argv[ 3 ] ) );
 
 	return 0;
 }

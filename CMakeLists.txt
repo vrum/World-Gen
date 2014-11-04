@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.10)
+cmake_minimum_required(VERSION 2.8.11)
 
 # A macro that sets the default value of a variable
 macro(variable_default_value var default)
@@ -22,8 +22,12 @@ project(World-Gen)
 
 # Set the version number
 set(VERSION_MAJOR 0)
-set(VERSION_MINOR 0)
+set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
+
+# Qt Stuff
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Set the source files
 set(SRC
@@ -50,6 +54,8 @@ endif()
 find_package(SFML 2 COMPONENTS graphics window system REQUIRED)
 include_directories(${SFML_INCLUDE_DIR})
 set(LIBS ${LIBS} ${SFML_LIBRARIES})
+find_package(Qt5Widgets REQUIRED)
+set(LIBS ${LIBS} Qt5::Widgets)
 
 # Build the game engine
 add_executable(World-Gen ${SRC})
