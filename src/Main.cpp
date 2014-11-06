@@ -6,6 +6,7 @@
 #include <SFML/Graphics/Image.hpp>
 #include "MapWriter.hpp"
 #include "World.hpp"
+#include "UI/Application.hpp"
 
 int main( int argc, char* argv[] ) {
 	// Read command-line arguments
@@ -43,5 +44,9 @@ int main( int argc, char* argv[] ) {
 	writer.writeHeightMapToFile( "Heightmap_" + std::string( argv[ 3 ] ) );
 	writer.writeHeatMapToFile( "Heat_" + std::string( argv[ 3 ] ) );
 
-	return 0;
+	// Construct the main application
+	Application main_app( argc, argv );
+
+	// Execute the app
+	return main_app.exec();
 }
