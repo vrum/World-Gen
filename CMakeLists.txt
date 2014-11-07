@@ -38,6 +38,7 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Vector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/World.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/Application.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/MainWindow.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/QSFML.cpp
 )
 

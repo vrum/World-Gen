@@ -5,33 +5,13 @@
 #define APPLICATION_HPP
 
 #include <QApplication>
-#include <QDockWidget>
-#include <QGridLayout>
-#include <QGroupBox>
-#include <QMainWindow>
-#include <QTabWidget>
-#include <QVBoxLayout>
+#include "MainWindow.hpp"
 
 class Application : public QApplication {
-	private:
-		QMainWindow m_main_window;
-
-		QGroupBox*   m_settings_box;
-		QDockWidget* m_settings_dock;
-		QVBoxLayout* m_settings_layout;
-
-		QTabWidget* m_viewer_tabs;
-
-		void createMainWindow();
-		void createSettingsBox();
-		void createSettingsDock();
-		void createSettingsLayout();
-		void createViewerTabs();
-
 	public:
-		Application( int& argc, char* argv[] );
+		MainWindow main_window;
 
-		~Application();
+		Application( int& argc, char* argv[] );
 };
 
 #endif // APPLICATION_HPP
