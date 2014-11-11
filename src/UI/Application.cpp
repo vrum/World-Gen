@@ -1,11 +1,12 @@
 // Copyright (c) 2014 Kody Kurtz
 // See the LICENSE file in the root directory of the repository for licensing information
 
+#include <cmath>
 #include <QLabel>
 #include "Application.hpp"
 #include "../MapWriter.hpp"
 
-//static const unsigned int num_digits = 2;
+static const unsigned int num_digits = 2;
 
 Application::Application( int& argc, char* argv[] ) :
 	QApplication( argc, argv ) {
@@ -30,8 +31,43 @@ Application::Application( int& argc, char* argv[] ) :
 }
 
 void Application::generateButtonPressed( bool ) {
-	// @todo Set all the parameters  of the world generator
-	// @todo Generate the world
+	double epsilon = 0.5 * pow( 10., -static_cast< double >( num_digits ) );
+
+	// Go through each parameter, and if it differs from what's in the world, update it
+	if( m_settings_general_width->value() != static_cast< int >( m_world_generator.getSize().x ) ||
+		m_settings_general_height->value() != static_cast< int >( m_world_generator.getSize().y ) ) {
+		Vector2ui new_size = { static_cast< unsigned int >( m_settings_general_width->value() ),
+							   static_cast< unsigned int >( m_settings_general_height->value() ) };
+		m_world_generator.setSize( new_size );
+	}
+
+	if( m_settings_general_seed->value() != static_cast< int >( m_world_generator.getSeed() ) ) {
+		m_world_generator.setSeed( static_cast< unsigned int >( m_settings_general_seed->value() ) );
+	}
+
+	if( std::abs( m_settings_general_persistence->value() - m_world_generator.getPersistence() ) > epsilon ) {
+		m_world_generator.setPersistence( m_settings_general_persistence->value() );
+	}
+
+	if( m_settings_general_octaves->value() != static_cast< int >( m_world_generator.getOctaves() ) ) {
+		m_world_generator.setOctaves( static_cast< unsigned int >( m_settings_general_octaves->value() ) );
+	}
+
+	if( std::abs( m_settings_weather_land_heat->value() - m_world_generator.getLandHeat() ) > epsilon ) {
+		m_world_generator.setLandHeat( m_settings_weather_land_heat->value() );
+	}
+
+	if( std::abs( m_settings_weather_sea_heat->value() - m_world_generator.getSeaHeat() ) > epsilon ) {
+		m_world_generator.setSeaHeat( m_settings_weather_sea_heat->value() );
+	}
+
+	m_world_generator.generateAuxillaryMaps();
+	m_viewer_height.removeItem( m_viewer_height_item );
+	m_viewer_heat.removeItem( m_viewer_heat_item );
+	QImage heightmap = MapWriter::writeHeightMapToImage( m_world_generator );
+	QImage heatmap = MapWriter::writeHeatMapToImage( m_world_generator );
+	m_viewer_height_item = m_viewer_height.addPixmap( QPixmap::fromImage( heightmap ) );
+	m_viewer_heat_item = m_viewer_heat.addPixmap( QPixmap::fromImage( heatmap ) );
 }
 
 void Application::setupMainWindow() {
@@ -103,6 +139,7 @@ void Application::setupSettingsGeneral() {
 	m_settings_general_seed->setRange( 0, 2147483647 );
 	m_settings_general_persistence->setRange( 0., 1. );
 	m_settings_general_persistence->setSingleStep( 0.05 );
+	m_settings_general_persistence->setDecimals( num_digits );
 	m_settings_general_octaves->setRange( 1, 128 );
 
 	// Attach the general inputs
@@ -145,8 +182,10 @@ void Application::setupSettingsWeather() {
 	// Setup the weather input fields
 	m_settings_weather_land_heat->setRange( -1., 1. );
 	m_settings_weather_land_heat->setSingleStep( 0.05 );
+	m_settings_weather_land_heat->setDecimals( num_digits );
 	m_settings_weather_sea_heat->setRange( -1., 1. );
 	m_settings_weather_sea_heat->setSingleStep( 0.05 );
+	m_settings_weather_sea_heat->setDecimals( num_digits );
 
 	// Attach the weather inputs
 	m_settings_weather_layout->addWidget( new QLabel( "Land Heat:" ), 1, 1, 1, 1 );
