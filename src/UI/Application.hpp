@@ -36,7 +36,10 @@ class Application : public QApplication {
 		QDoubleSpinBox* m_settings_general_persistence;
 		QSpinBox*       m_settings_general_octaves;
 
-		QWidget* m_settings_weather_tab;
+		QWidget*        m_settings_weather_tab;
+		QGridLayout*    m_settings_weather_layout;
+		QDoubleSpinBox* m_settings_weather_land_heat;
+		QDoubleSpinBox* m_settings_weather_sea_heat;
 
 		QTabWidget* m_viewer_tabs;
 
@@ -46,7 +49,9 @@ class Application : public QApplication {
 		void setupMainWindow();
 		void setupMapViewer();
 		void setupSettingsDock();
+		void setupSettingsGeneral();
 		void setupSettingsTabs();
+		void setupSettingsWeather();
 
 	public:
 		Application( int& argc, char* argv[] );

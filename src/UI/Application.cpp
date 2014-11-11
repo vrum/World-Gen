@@ -63,10 +63,7 @@ void Application::setupSettingsDock() {
 	m_settings_dock->setWidget( m_settings_box );
 }
 
-void Application::setupSettingsTabs() {
-	// Create the tab container
-	m_settings_tabs = new QTabWidget;
-
+void Application::setupSettingsGeneral() {
 	// Create the general tab
 	m_settings_general_tab = new QWidget;
 	m_settings_general_layout = new QGridLayout;
@@ -77,8 +74,8 @@ void Application::setupSettingsTabs() {
 	m_settings_general_octaves = new QSpinBox;
 
 	// Setup the general input fields
-	m_settings_general_width->setRange( 1, static_cast< int >( sf::Texture::getMaximumSize() ) );
-	m_settings_general_height->setRange( 1, static_cast< int >( sf::Texture::getMaximumSize() ) );
+	m_settings_general_width->setRange( 0, static_cast< int >( sf::Texture::getMaximumSize() ) );
+	m_settings_general_height->setRange( 0, static_cast< int >( sf::Texture::getMaximumSize() ) );
 	m_settings_general_seed->setMinimum( 0 );
 	m_settings_general_persistence->setRange( 0., 1. );
 	m_settings_general_persistence->setSingleStep( 0.05 );
@@ -96,14 +93,44 @@ void Application::setupSettingsTabs() {
 	m_settings_general_layout->addWidget( new QLabel( "Octaves:" ), 5, 1, 1, 1 );
 	m_settings_general_layout->addWidget( m_settings_general_octaves, 5, 2, 1, 1 );
 
-	// Attach the general tab to the tab container
+	// Adjust the layout
 	m_settings_general_layout->setSizeConstraint( QLayout::SetMinimumSize );
 	m_settings_general_tab->setLayout( m_settings_general_layout );
+}
+
+void Application::setupSettingsTabs() {
+	// Create the tab container
+	m_settings_tabs = new QTabWidget;
+
+	// Setup the general tab
+	setupSettingsGeneral();
 	m_settings_tabs->addTab( m_settings_general_tab, "General" );
 
+	// Setup the settings tab
+	setupSettingsWeather();
+	m_settings_tabs->addTab( m_settings_weather_tab, "Weather" );
+}
+
+void Application::setupSettingsWeather() {
 	// Create the weather tab
 	m_settings_weather_tab = new QWidget;
+	m_settings_weather_layout = new QGridLayout;
+	m_settings_weather_land_heat = new QDoubleSpinBox;
+	m_settings_weather_sea_heat = new QDoubleSpinBox;
 
-	// Attach the weather tab to the tab container
-	m_settings_tabs->addTab( m_settings_weather_tab, "Weather" );
+	// Setup the weather input fields
+	m_settings_weather_land_heat->setRange( -1., 1. );
+	m_settings_weather_land_heat->setSingleStep( 0.05 );
+	m_settings_weather_sea_heat->setRange( -1., 1. );
+	m_settings_weather_sea_heat->setSingleStep( 0.05 );
+
+	// Attach the weather inputs
+	m_settings_weather_layout->addWidget( new QLabel( "Land Heat:" ), 1, 1, 1, 1 );
+	m_settings_weather_layout->addWidget( m_settings_weather_land_heat, 1, 2, 1, 1 );
+	m_settings_weather_layout->addWidget( new QLabel( "Sea Heat:" ), 2, 1, 1, 1 );
+	m_settings_weather_layout->addWidget( m_settings_weather_sea_heat, 2, 2, 1, 1 );
+
+	// Adjust the layout
+	m_settings_weather_layout->setSizeConstraint( QLayout::SetMinimumSize );
+	m_settings_weather_tab->setLayout( m_settings_weather_layout );
 }
