@@ -3,13 +3,13 @@
 // Adapted from http://becomingindiedev.blogspot.com/2013/10/qt-5-and-sfml-20-integration.html
 // Thanks to the author of that blog!
 
-#include "QSFML.hpp"
+#include "QSFMLCanvas.hpp"
 #ifdef Q_WS_X11
 #include <Qt/qx11info_x11.h>
 #include <X11/Xlib.h>
 #endif
 
-QSFML::QSFML( QWidget* parent, const QPoint& position, const QSize& size ) :
+QSFMLCanvas::QSFMLCanvas( QWidget* parent, const QPoint& position, const QSize& size ) :
 	QWidget( parent ),
 	m_initialized( false ) {
 	// Setup Qt attributes for rendering
@@ -25,7 +25,7 @@ QSFML::QSFML( QWidget* parent, const QPoint& position, const QSize& size ) :
 	resize( size );
 }
 
-void QSFML::showEvent( QShowEvent* ) {
+void QSFMLCanvas::showEvent( QShowEvent* ) {
 	if ( !m_initialized ) {
 		// Flush events in X11
 		#ifdef Q_WS_X11
@@ -46,11 +46,11 @@ void QSFML::showEvent( QShowEvent* ) {
 	}
 }
 
-QPaintEngine* QSFML::paintEngine() const {
+QPaintEngine* QSFMLCanvas::paintEngine() const {
 	return nullptr;
 }
 
-void QSFML::paintEvent(QPaintEvent*) {
+void QSFMLCanvas::paintEvent(QPaintEvent*) {
 	// Let the derived class do its thing
 	onUpdate();
 
@@ -58,11 +58,11 @@ void QSFML::paintEvent(QPaintEvent*) {
 	sf::RenderWindow::display();
 }
 
-void QSFML::onInit() {
+void QSFMLCanvas::onInit() {
 }
 
-void QSFML::onUpdate() {
+void QSFMLCanvas::onUpdate() {
 }
 
-QSFML::~QSFML() {
+QSFMLCanvas::~QSFMLCanvas() {
 }
