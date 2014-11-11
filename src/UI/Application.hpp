@@ -7,16 +7,26 @@
 #include <QApplication>
 #include <QDockWidget>
 #include <QDoubleSpinBox>
+#include <QGraphicsItem>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include <QGridLayout>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QVBoxLayout>
+#include "../World.hpp"
+
+//////////////////////////////////////////////////////////////////////
+/// @todo Finish fixing viewer (QGraphicsScene and QGraphicsViews) ///
+//////////////////////////////////////////////////////////////////////
 
 class Application : public QApplication {
 	Q_OBJECT
 
 	private:
+		World m_world_generator;
+
 		///////////////
 		/// Widgets ///
 		///////////////
@@ -41,7 +51,13 @@ class Application : public QApplication {
 		QDoubleSpinBox* m_settings_weather_land_heat;
 		QDoubleSpinBox* m_settings_weather_sea_heat;
 
-		QTabWidget* m_viewer_tabs;
+		QTabWidget*    m_viewer_tabs;
+		QGraphicsScene m_viewer_height;
+		QGraphicsItem* m_viewer_height_item;
+		QGraphicsView* m_viewer_height_display;
+		QGraphicsScene m_viewer_heat;
+		QGraphicsItem* m_viewer_heat_item;
+		QGraphicsView* m_viewer_heat_display;
 
 		///////////////////////
 		/// Setup Functions ///

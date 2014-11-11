@@ -2,13 +2,31 @@
 // See the LICENSE file in the root directory of the repository for licensing information
 
 #include <QLabel>
-#include <SFML/Graphics/Texture.hpp>
 #include "Application.hpp"
+#include "../MapWriter.hpp"
+
+//static const unsigned int num_digits = 2;
 
 Application::Application( int& argc, char* argv[] ) :
 	QApplication( argc, argv ) {
 	// Do the setup!
 	setupMainWindow();
+
+	// Rip values out of the world generator and feed them to the UI
+	m_settings_general_width->setValue( static_cast< int >( m_world_generator.getSize().x ) );
+	m_settings_general_height->setValue( static_cast< int >( m_world_generator.getSize().y ) );
+	m_settings_general_seed->setValue( static_cast< int >( m_world_generator.getSeed() ) );
+	m_settings_general_persistence->setValue( m_world_generator.getPersistence() );
+	m_settings_general_octaves->setValue( static_cast< int >( m_world_generator.getOctaves() ) );
+	m_settings_weather_land_heat->setValue( m_world_generator.getLandHeat() );
+	m_settings_weather_sea_heat->setValue( m_world_generator.getSeaHeat() );
+
+	// Generate the default world
+	m_world_generator.generateWorld();
+	QImage heightmap = MapWriter::writeHeightMapToImage( m_world_generator );
+	QImage heatmap = MapWriter::writeHeatMapToImage( m_world_generator );
+	m_viewer_height_item = m_viewer_height.addPixmap( QPixmap::fromImage( heightmap ) );
+	m_viewer_heat_item = m_viewer_heat.addPixmap( QPixmap::fromImage( heatmap ) );
 }
 
 void Application::generateButtonPressed( bool ) {
@@ -33,6 +51,12 @@ void Application::setupMainWindow() {
 void Application::setupMapViewer() {
 	// Create the tab container
 	m_viewer_tabs = new QTabWidget;
+	m_viewer_height_display = new QGraphicsView( &m_viewer_height );
+	m_viewer_heat_display = new QGraphicsView( &m_viewer_heat );
+
+	// Attach everything properly
+	m_viewer_tabs->addTab( m_viewer_height_display, "Height" );
+	m_viewer_tabs->addTab( m_viewer_heat_display, "Heat" );
 }
 
 void Application::setupSettingsDock() {
@@ -74,9 +98,9 @@ void Application::setupSettingsGeneral() {
 	m_settings_general_octaves = new QSpinBox;
 
 	// Setup the general input fields
-	m_settings_general_width->setRange( 0, static_cast< int >( sf::Texture::getMaximumSize() ) );
-	m_settings_general_height->setRange( 0, static_cast< int >( sf::Texture::getMaximumSize() ) );
-	m_settings_general_seed->setMinimum( 0 );
+	m_settings_general_width->setRange( 0, 8192 );
+	m_settings_general_height->setRange( 0, 8192 );
+	m_settings_general_seed->setRange( 0, 2147483647 );
 	m_settings_general_persistence->setRange( 0., 1. );
 	m_settings_general_persistence->setSingleStep( 0.05 );
 	m_settings_general_octaves->setRange( 1, 128 );

@@ -6,21 +6,24 @@
 #include "Noise.hpp"
 #include "World.hpp"
 
+static const unsigned int default_width = 256;
+static const unsigned int default_height = 256;
+
 World::World() :
-	m_height_map( 0u, 0u ),
-	m_heat_map( 0u, 0u ),
-	m_heat_source_map( 0u, 0u ) {
+	m_height_map( default_width, default_height ),
+	m_heat_map( default_width, default_height ),
+	m_heat_source_map( default_width, default_height ),
+	m_size{ default_width, default_height } {
 	std::random_device entropy;
 	m_elevation_heat_dropoff = 0.5;
 	m_heat_noise             = 0.01;
 	m_height_map_generated   = false;
 	m_land_heat_adjust       = 0.05;
-	m_octaves                = 8;
-	m_persistence            = 0.5;
+	m_octaves                = 10;
+	m_persistence            = 0.6;
 	m_sea_heat_adjust        = -0.05;
 	m_sea_level              = 0.;
 	m_seed                   = entropy();
-	m_size                   = { 0u, 0u };
 }
 
 void World::generateAuxillaryMaps() {

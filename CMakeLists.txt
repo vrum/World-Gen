@@ -38,7 +38,6 @@ set(SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Vector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/World.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/Application.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/QSFMLCanvas.cpp
 )
 
 # Set the output directory
@@ -53,11 +52,9 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 # Locate libraries
-find_package(SFML 2 COMPONENTS graphics window system REQUIRED)
-include_directories(${SFML_INCLUDE_DIR})
-set(LIBS ${LIBS} ${SFML_LIBRARIES})
 find_package(Qt5Widgets REQUIRED)
 set(LIBS ${LIBS} Qt5::Widgets)
+set(LIBS ${LIBS} Qt5::Gui)
 
 # Build the game engine
 add_executable(World-Gen ${SRC})

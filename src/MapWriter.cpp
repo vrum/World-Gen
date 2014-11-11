@@ -1,7 +1,7 @@
 // Copyright (c) 2014 Kody Kurtz
 // See the LICENSE file in the root directory of the repository for licensing information
 
-#include <SFML/Graphics/Image.hpp>
+#include <QColor>
 #include "MapWriter.hpp"
 
 void MapWriter::setWorld( World& world ) {
@@ -9,41 +9,44 @@ void MapWriter::setWorld( World& world ) {
 }
 
 void MapWriter::writeHeatMapToFile( std::string filename ) {
-	sf::Image image = writeHeatMapToImage();
+	QImage image = writeHeatMapToImage();
 
-	image.saveToFile( filename );
+	image.save( filename.c_str() );
 }
 
-sf::Image MapWriter::writeHeatMapToImage() {
-	Array< double, 2 > heatmap = m_world.getHeatMap();
-	Vector2ui size = m_world.getSize();
+QImage MapWriter::writeHeatMapToImage() {
+	return MapWriter::writeHeatMapToImage( m_world );
+}
 
-	sf::Image image;
-	image.create( size.x, size.y );
+QImage MapWriter::writeHeatMapToImage( World& world ) {
+	Array< double, 2 > heatmap = world.getHeatMap();
+	Vector2ui size = world.getSize();
+
+	QImage image( static_cast< int >( size.x ), static_cast< int >( size.y ), QImage::Format_ARGB32 );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
-			sf::Color pixel_color;
+			QColor pixel_color;
 
 			// Hot
 			if( heatmap[ x ][ y ] > 0. ) {
-				sf::Color hot( 255, 0, 0 );
-				sf::Color neutral( 255, 255, 0 );
+				QColor hot( 255, 0, 0 );
+				QColor neutral( 255, 255, 0 );
 				double mixer = heatmap[ x ][ y ];
-				pixel_color.r = static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.r + mixer * hot.r );
-				pixel_color.g = static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.g + mixer * hot.g );
-				pixel_color.b = static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.b + mixer * hot.b );
+				pixel_color.setRed( static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.red() + mixer * hot.red() ) );
+				pixel_color.setGreen( static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.green() + mixer * hot.green() ) );
+				pixel_color.setBlue( static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.blue() + mixer * hot.blue() ) );
 			}
 			// Cold
 			else {
-				sf::Color neutral( 255, 255, 0 );
-				sf::Color cold( 0, 0, 255 );
+				QColor neutral( 255, 255, 0 );
+				QColor cold( 0, 0, 255 );
 				double mixer = -heatmap[ x ][ y ];
-				pixel_color.r = static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.r + mixer * cold.r );
-				pixel_color.g = static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.g + mixer * cold.g );
-				pixel_color.b = static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.b + mixer * cold.b );
+				pixel_color.setRed( static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.red() + mixer * cold.red() ) );
+				pixel_color.setGreen( static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.green() + mixer * cold.green() ) );
+				pixel_color.setBlue( static_cast< std::uint8_t >( ( 1. - mixer ) * neutral.blue() + mixer * cold.blue() ) );
 			}
 
-			image.setPixel( x, y, pixel_color );
+			image.setPixel( static_cast< int >( x ), static_cast< int >( y ), pixel_color.rgba() );
 		}
 	}
 
@@ -51,42 +54,45 @@ sf::Image MapWriter::writeHeatMapToImage() {
 }
 
 void MapWriter::writeHeightMapToFile( std::string filename ) {
-	sf::Image image = writeHeightMapToImage();
+	QImage image = writeHeightMapToImage();
 
-	image.saveToFile( filename );
+	image.save( filename.c_str() );
 }
 
-sf::Image MapWriter::writeHeightMapToImage() {
-	Array< double, 2 > heightmap = m_world.getHeightMap();
-	Vector2ui size = m_world.getSize();
-	double sea_level = m_world.getSeaLevel();
+QImage MapWriter::writeHeightMapToImage() {
+	return MapWriter::writeHeightMapToImage( m_world );
+}
 
-	sf::Image image;
-	image.create( size.x, size.y );
+QImage MapWriter::writeHeightMapToImage( World& world ) {
+	Array< double, 2 > heightmap = world.getHeightMap();
+	Vector2ui size = world.getSize();
+	double sea_level = world.getSeaLevel();
+
+	QImage image( static_cast< int >( size.x ), static_cast< int >( size.y ), QImage::Format_ARGB32 );
 	for( unsigned int x = 0; x < size.x; ++x ) {
 		for( unsigned int y = 0; y < size.y; ++y ) {
-			sf::Color pixel_color;
+			QColor pixel_color;
 
 			// Land
 			if( heightmap[ x ][ y ] > sea_level ) {
-				sf::Color mountain( 128, 128, 128 );
-				sf::Color land( 0, 255, 0 );
+				QColor mountain( 128, 128, 128 );
+				QColor land( 0, 255, 0 );
 				double mixer = ( heightmap[ x ][ y ] - sea_level ) / ( 1. - sea_level );
-				pixel_color.r = static_cast< std::uint8_t >( ( 1. - mixer ) * land.r + mixer * mountain.r );
-				pixel_color.g = static_cast< std::uint8_t >( ( 1. - mixer ) * land.g + mixer * mountain.g );
-				pixel_color.b = static_cast< std::uint8_t >( ( 1. - mixer ) * land.b + mixer * mountain.b );
+				pixel_color.setRed( static_cast< std::uint8_t >( ( 1. - mixer ) * land.red() + mixer * mountain.red() ) );
+				pixel_color.setGreen( static_cast< std::uint8_t >( ( 1. - mixer ) * land.green() + mixer * mountain.green() ) );
+				pixel_color.setBlue( static_cast< std::uint8_t >( ( 1. - mixer ) * land.blue() + mixer * mountain.blue() ) );
 			}
 			// Water
 			else {
-				sf::Color deep( 0, 0, 128 );
-				sf::Color shallow( 0, 0, 255 );
+				QColor deep( 0, 0, 128 );
+				QColor shallow( 0, 0, 255 );
 				double mixer = ( sea_level - heightmap[ x ][ y ] ) / ( 1. + sea_level );
-				pixel_color.r = static_cast< std::uint8_t >( ( 1. - mixer ) * shallow.r + mixer * deep.r );
-				pixel_color.g = static_cast< std::uint8_t >( ( 1. - mixer ) * shallow.g + mixer * deep.g );
-				pixel_color.b = static_cast< std::uint8_t >( ( 1. - mixer ) * shallow.b + mixer * deep.b );
+				pixel_color.setRed( static_cast< std::uint8_t >( ( 1. - mixer ) * shallow.red() + mixer * deep.red() ) );
+				pixel_color.setGreen( static_cast< std::uint8_t >( ( 1. - mixer ) * shallow.green() + mixer * deep.green() ) );
+				pixel_color.setBlue( static_cast< std::uint8_t >( ( 1. - mixer ) * shallow.blue() + mixer * deep.blue() ) );
 			}
 
-			image.setPixel( x, y, pixel_color );
+			image.setPixel( static_cast< int >( x ), static_cast< int >( y ), pixel_color.rgba() );
 		}
 	}
 
