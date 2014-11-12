@@ -184,6 +184,7 @@ void Application::setupSettingsGeneral() {
 	m_settings_general_width->setRange( 0, 8192 );
 	m_settings_general_height->setRange( 0, 8192 );
 	m_settings_general_sea_level->setRange( -1., 1. );
+	m_settings_general_sea_level->setSingleStep( 0.05 );
 	m_settings_general_seed->setRange( 0., static_cast< double >( UINT_MAX ) );
 	m_settings_general_seed->setDecimals( 0 );
 	m_settings_general_persistence->setRange( 0., 1. );

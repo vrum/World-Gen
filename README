@@ -12,6 +12,7 @@ World-Gen is licensed under the MIT license, compatible with the LGPL
 under which Qt5 is licensed.
 
 Changelog:
+V1.1.1: Fixed an issue with the up/down arrows on the sea level adjuster.
 V1.1.0: Added the ability to adjust the sea level.
 V1.0.3: Made the randomize seed button also simultaneously regenerate the world.
 V1.0.2: Fixed a bug with tiling in world where the size is not a power of 2.
