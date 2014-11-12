@@ -22,6 +22,9 @@ class MapWriter {
 
 		void writeHeightMapToFile( std::string filename );
 		void writeHeatMapToFile( std::string filename );
+
+		static void writeHeightMapToFile( World& world, std::string filename );
+		static void writeHeatMapToFile( World& world, std::string filename );
 };
 
 #endif // MAPWRITER_HPP

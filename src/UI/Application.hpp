@@ -36,6 +36,7 @@ class Application : public QApplication {
 		QWidget*     m_settings_box;
 		QVBoxLayout* m_settings_main_layout;
 		QTabWidget*  m_settings_tabs;
+		QPushButton* m_settings_randomize_button;
 		QPushButton* m_settings_generate_button;
 
 		QWidget*        m_settings_general_tab;
@@ -74,6 +75,9 @@ class Application : public QApplication {
 
 	private slots:
 		void generateButtonPressed( bool );
+		void randomizeButtonPressed( bool );
+		void saveHeightMap();
+		void saveHeatMap();
 };
 
 #endif // APPLICATION_HPP

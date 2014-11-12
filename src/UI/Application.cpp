@@ -2,7 +2,12 @@
 // See the LICENSE file in the root directory of the repository for licensing information
 
 #include <cmath>
+#include <cstdint>
+#include <QFileDialog>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QMenu>
+#include <QMenuBar>
 #include "Application.hpp"
 #include "../MapWriter.hpp"
 
@@ -70,6 +75,21 @@ void Application::generateButtonPressed( bool ) {
 	m_viewer_heat_item = m_viewer_heat.addPixmap( QPixmap::fromImage( heatmap ) );
 }
 
+void Application::randomizeButtonPressed( bool ) {
+	m_world_generator.setSeed();
+	m_settings_general_seed->setValue( static_cast< double >( m_world_generator.getSeed() ) );
+}
+
+void Application::saveHeatMap() {
+	QString filename = QFileDialog::getSaveFileName( &m_main_window, "Save Heatmap to...", "./Heatmap.png" );
+	MapWriter::writeHeatMapToFile( m_world_generator, filename.toStdString() );
+}
+
+void Application::saveHeightMap() {
+	QString filename = QFileDialog::getSaveFileName( &m_main_window, "Save Heightmap to...", "./Heightmap.png" );
+	MapWriter::writeHeightMapToFile( m_world_generator, filename.toStdString() );
+}
+
 void Application::setupMainWindow() {
 	// Settings dock
 	setupSettingsDock();
@@ -78,6 +98,14 @@ void Application::setupMainWindow() {
 	// Viewer tabs
 	setupMapViewer();
 	m_main_window.setCentralWidget( m_viewer_tabs );
+
+	// File menu
+	QMenu* file_menu = new QMenu( "File" );
+	QAction* save_height_action = file_menu->addAction( "Save Heightmap" );
+	QAction* save_heat_action = file_menu->addAction( "Save Heatmap" );
+	connect( save_height_action, SIGNAL( triggered() ), this, SLOT( saveHeightMap() ) );
+	connect( save_heat_action, SIGNAL( triggered() ), this, SLOT( saveHeatMap() ) );
+	m_main_window.menuBar()->addMenu( file_menu );
 
 	// Make the window visible
 	m_main_window.show();
@@ -108,11 +136,24 @@ void Application::setupSettingsDock() {
 	setupSettingsTabs();
 	m_settings_main_layout->addWidget( m_settings_tabs );
 
-	// Create the "Generate" button
-	m_settings_generate_button = new QPushButton( "Generate World" );
-	m_settings_main_layout->addWidget( m_settings_generate_button );
+	// Free space!
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+	m_settings_main_layout->addWidget( spacer );
 
-	// Attach the "Generate" button to the proper slot
+	// Create the buttons
+	QWidget* button_container = new QWidget;
+	QHBoxLayout* button_layout = new QHBoxLayout;
+	m_settings_randomize_button = new QPushButton( "Randomize Seed" );
+	m_settings_generate_button = new QPushButton( "Generate World" );
+	button_layout->addWidget( m_settings_randomize_button );
+	button_layout->addWidget( m_settings_generate_button );
+	button_layout->setSizeConstraint( QLayout::SetMinimumSize );
+	button_container->setLayout( button_layout );
+	m_settings_main_layout->addWidget( button_container );
+
+	// Attach the buttons to the proper slots
+	QObject::connect( m_settings_randomize_button, &QPushButton::clicked, this, &Application::randomizeButtonPressed );
 	QObject::connect( m_settings_generate_button, &QPushButton::clicked, this, &Application::generateButtonPressed );
 
 	// Finish the main settings box and layout
@@ -136,7 +177,7 @@ void Application::setupSettingsGeneral() {
 	// Setup the general input fields
 	m_settings_general_width->setRange( 0, 8192 );
 	m_settings_general_height->setRange( 0, 8192 );
-	m_settings_general_seed->setRange( 0., 4294967295. );
+	m_settings_general_seed->setRange( 0., static_cast< double >( UINT_MAX ) );
 	m_settings_general_seed->setDecimals( 0 );
 	m_settings_general_persistence->setRange( 0., 1. );
 	m_settings_general_persistence->setSingleStep( 0.05 );

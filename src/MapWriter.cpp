@@ -9,7 +9,11 @@ void MapWriter::setWorld( World& world ) {
 }
 
 void MapWriter::writeHeatMapToFile( std::string filename ) {
-	QImage image = writeHeatMapToImage();
+	writeHeatMapToFile( m_world, filename );
+}
+
+void MapWriter::writeHeatMapToFile( World& world, std::string filename ) {
+	QImage image = writeHeatMapToImage( world );
 
 	image.save( filename.c_str() );
 }
@@ -54,7 +58,11 @@ QImage MapWriter::writeHeatMapToImage( World& world ) {
 }
 
 void MapWriter::writeHeightMapToFile( std::string filename ) {
-	QImage image = writeHeightMapToImage();
+	writeHeightMapToFile( m_world, filename );
+}
+
+void MapWriter::writeHeightMapToFile( World& world, std::string filename ) {
+	QImage image = writeHeightMapToImage( world );
 
 	image.save( filename.c_str() );
 }
