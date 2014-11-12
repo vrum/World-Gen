@@ -75,9 +75,10 @@ void Application::generateButtonPressed( bool ) {
 	m_viewer_heat_item = m_viewer_heat.addPixmap( QPixmap::fromImage( heatmap ) );
 }
 
-void Application::randomizeButtonPressed( bool ) {
+void Application::randomizeButtonPressed( bool pass_along ) {
 	m_world_generator.setSeed();
 	m_settings_general_seed->setValue( static_cast< double >( m_world_generator.getSeed() ) );
+	generateButtonPressed( pass_along );
 }
 
 void Application::saveHeatMap() {
