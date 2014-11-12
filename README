@@ -1,0 +1,12 @@
+World-Gen is a 2D top-down world generator created by Kody Kurtz. If you
+wish to use a tool that automatically generates a world for you, this
+tool may be for you.
+
+To compile, make sure you have CMake, a C++11 compliant compiler, and
+Qt5 installed. From the root directory of the repository, create a new
+folder titled "Build" and move into it. From there, execute "cmake .."
+followed by "make -j 4" to build World-Gen. World-Gen will then be
+located in the newly created "bin" directory.
+
+World-Gen is licensed under the MIT license, compatible with the LGPL
+under which Qt5 is licensed.
