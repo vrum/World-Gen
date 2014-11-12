@@ -41,7 +41,7 @@ void Application::generateButtonPressed( bool ) {
 		m_world_generator.setSize( new_size );
 	}
 
-	if( m_settings_general_seed->value() != static_cast< int >( m_world_generator.getSeed() ) ) {
+	if( static_cast< unsigned int >( m_settings_general_seed->value() ) != m_world_generator.getSeed() ) {
 		m_world_generator.setSeed( static_cast< unsigned int >( m_settings_general_seed->value() ) );
 	}
 
@@ -129,14 +129,15 @@ void Application::setupSettingsGeneral() {
 	m_settings_general_layout = new QGridLayout;
 	m_settings_general_width = new QSpinBox;
 	m_settings_general_height = new QSpinBox;
-	m_settings_general_seed = new QSpinBox;
+	m_settings_general_seed = new QDoubleSpinBox;
 	m_settings_general_persistence = new QDoubleSpinBox;
 	m_settings_general_octaves = new QSpinBox;
 
 	// Setup the general input fields
 	m_settings_general_width->setRange( 0, 8192 );
 	m_settings_general_height->setRange( 0, 8192 );
-	m_settings_general_seed->setRange( 0, 2147483647 );
+	m_settings_general_seed->setRange( 0., 4294967295. );
+	m_settings_general_seed->setDecimals( 0 );
 	m_settings_general_persistence->setRange( 0., 1. );
 	m_settings_general_persistence->setSingleStep( 0.05 );
 	m_settings_general_persistence->setDecimals( num_digits );

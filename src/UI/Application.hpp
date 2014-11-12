@@ -42,7 +42,7 @@ class Application : public QApplication {
 		QGridLayout*    m_settings_general_layout;
 		QSpinBox*       m_settings_general_width;
 		QSpinBox*       m_settings_general_height;
-		QSpinBox*       m_settings_general_seed;
+		QDoubleSpinBox* m_settings_general_seed;
 		QDoubleSpinBox* m_settings_general_persistence;
 		QSpinBox*       m_settings_general_octaves;
 
