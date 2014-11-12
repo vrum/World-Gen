@@ -10,3 +10,11 @@ located in the newly created "bin" directory.
 
 World-Gen is licensed under the MIT license, compatible with the LGPL
 under which Qt5 is licensed.
+
+Changelog:
+V1.1.0: Added the ability to adjust the sea level.
+V1.0.3: Made the randomize seed button also simultaneously regenerate the world.
+V1.0.2: Fixed a bug with tiling in world where the size is not a power of 2.
+V1.0.1: Added a README with compilation instructions.
+V1.0.0: Initial GUI based release.
+V0.1.0: Initial command line version. Not user friendly.

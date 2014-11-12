@@ -46,6 +46,10 @@ void Application::generateButtonPressed( bool ) {
 		m_world_generator.setSize( new_size );
 	}
 
+	if( std::abs( m_settings_general_sea_level->value() - m_world_generator.getSeaLevel() ) > epsilon ) {
+		m_world_generator.setSeaLevel( m_settings_general_sea_level->value() );
+	}
+
 	if( static_cast< unsigned int >( m_settings_general_seed->value() ) != m_world_generator.getSeed() ) {
 		m_world_generator.setSeed( static_cast< unsigned int >( m_settings_general_seed->value() ) );
 	}
@@ -171,6 +175,7 @@ void Application::setupSettingsGeneral() {
 	m_settings_general_layout = new QGridLayout;
 	m_settings_general_width = new QSpinBox;
 	m_settings_general_height = new QSpinBox;
+	m_settings_general_sea_level = new QDoubleSpinBox;
 	m_settings_general_seed = new QDoubleSpinBox;
 	m_settings_general_persistence = new QDoubleSpinBox;
 	m_settings_general_octaves = new QSpinBox;
@@ -178,6 +183,7 @@ void Application::setupSettingsGeneral() {
 	// Setup the general input fields
 	m_settings_general_width->setRange( 0, 8192 );
 	m_settings_general_height->setRange( 0, 8192 );
+	m_settings_general_sea_level->setRange( -1., 1. );
 	m_settings_general_seed->setRange( 0., static_cast< double >( UINT_MAX ) );
 	m_settings_general_seed->setDecimals( 0 );
 	m_settings_general_persistence->setRange( 0., 1. );
@@ -190,12 +196,14 @@ void Application::setupSettingsGeneral() {
 	m_settings_general_layout->addWidget( m_settings_general_width, 1, 2, 1, 1 );
 	m_settings_general_layout->addWidget( new QLabel( "Height:" ), 2, 1, 1, 1 );
 	m_settings_general_layout->addWidget( m_settings_general_height, 2, 2, 1, 1 );
-	m_settings_general_layout->addWidget( new QLabel( "Seed:" ), 3, 1, 1, 1 );
-	m_settings_general_layout->addWidget( m_settings_general_seed, 3, 2, 1, 1 );
-	m_settings_general_layout->addWidget( new QLabel( "Persistence:" ), 4, 1, 1, 1 );
-	m_settings_general_layout->addWidget( m_settings_general_persistence, 4, 2, 1, 1 );
-	m_settings_general_layout->addWidget( new QLabel( "Octaves:" ), 5, 1, 1, 1 );
-	m_settings_general_layout->addWidget( m_settings_general_octaves, 5, 2, 1, 1 );
+	m_settings_general_layout->addWidget( new QLabel( "Sea Level:" ), 3, 1, 1, 1 );
+	m_settings_general_layout->addWidget( m_settings_general_sea_level, 3, 2, 1, 1 );
+	m_settings_general_layout->addWidget( new QLabel( "Seed:" ), 4, 1, 1, 1 );
+	m_settings_general_layout->addWidget( m_settings_general_seed, 4, 2, 1, 1 );
+	m_settings_general_layout->addWidget( new QLabel( "Persistence:" ), 5, 1, 1, 1 );
+	m_settings_general_layout->addWidget( m_settings_general_persistence, 5, 2, 1, 1 );
+	m_settings_general_layout->addWidget( new QLabel( "Octaves:" ), 6, 1, 1, 1 );
+	m_settings_general_layout->addWidget( m_settings_general_octaves, 6, 2, 1, 1 );
 
 	// Adjust the layout
 	m_settings_general_layout->setSizeConstraint( QLayout::SetMinimumSize );
