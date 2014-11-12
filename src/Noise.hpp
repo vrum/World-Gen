@@ -10,8 +10,8 @@
 double noiseFunc2D( unsigned int seed, unsigned int x, unsigned int y );
 double noiseFunc4D( unsigned int seed, unsigned int x, unsigned int y, unsigned int u, unsigned int v );
 
-Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling );
-Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, double scaling );
+Array< double, 2 > generateNoiseOctaveUntiled( Vector2ui size, unsigned int seed, double scaling_x, double scaling_y );
+Array< double, 2 > generateNoiseOctaveTiled( Vector2ui size, unsigned int seed, double scaling_x, double scaling_y );
 
 Array< double, 2 > generateNoise( Vector2ui size, unsigned int octaves = 8, double dropoff = 0.5, bool tile = true );
 Array< double, 2 > generateNoise( Vector2ui size, unsigned int seed, unsigned int octaves = 8, double dropoff = 0.5,
